@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Proposal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to bottom, #ffe6e6, #ffb3ba, #ff8a80);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        h1, h2 {
+            font-family: 'Dancing Script', cursive;
+            color: #d32f2f;
+        }
+        .section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .hero h1 {
+            font-size: 4em;
+            margin: 0;
+        }
+        .hero p {
+            font-size: 1.2em;
+            margin: 20px 0;
+            text-align: center;
+        }
+        button {
+            background: #ff4081;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        button:hover {
+            background: #e91e63;
+            transform: scale(1.05);
+        }
+        .lines {
+            max-width: 600px;
+            text-align: center;
+        }
+        .line {
+            display: none;
+            margin: 10px 0;
+            font-size: 1.1em;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+        }
+        .line.visible {
+            display: block;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .caption {
+            font-size: 0.9em;
+            margin-top: 20px;
+            color: #666;
+        }
+        .paragraphs {
+            max-width: 600px;
+            text-align: center;
+        }
+        .paragraph {
+            display: none;
+            margin: 20px 0;
+            font-size: 1.1em;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeIn 2s ease forwards;
+        }
+        .paragraph.visible {
+            display: block;
+        }
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 800px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 1em;
+            text-align: center;
+            width: 250px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        .popup {
+            display: none;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 0.9em;
+            z-index: 10;
+        }
+        .card:hover .popup {
+            display: block;
+        }
+        .questions {
+            text-align: center;
+        }
+        .question {
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .reaction {
+            display: none;
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #ff4081;
+        }
+        .distance-text {
+            max-width: 600px;
+            text-align: center;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        .distance-line {
+            display: none;
+            margin: 10px 0;
+            opacity: 0;
+            animation: fadeIn 2s ease forwards;
+        }
+        .distance-line.visible {
+            display: block;
+        }
+        .no-btn {
+            transition: transform 0.5s, font-size 0.5s;
+        }
+        .yes-btn {
+            transition: transform 0.5s, font-size 0.5s;
+        }
+        .final-message {
+            display: none;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        .footer {
+            font-size: 0.8em;
+            margin-top: 20px;
+            color: #666;
+        }
+        .hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .heart {
+            position: absolute;
+            font-size: 1.5em;
+            color: #ff4081;
+            animation: float 15s linear infinite;
+            opacity: 0.7;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0.7; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        .confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: hsl(var(--hue), 100%, 50%);
+            animation: fall 4s linear infinite;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(100vh); }
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 3em; }
+            .cards { flex-direction: column; align-items: center; }
+            .card { width: 80%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts" id="hearts"></div>
+    <div class="confetti" id="confetti"></div>
+
+    <section class="section hero visible" id="hero">
+        <h1>Hi b ❤️</h1>
+        <p>I know you’re busy.<br>But give me 2 minutes.<br>I promise this is worth it.</p>
+        <button onclick="nextSection('before')">Okay fine 😌</button>
+    </section>
+
+    <section class="section" id="before">
+        <div class="lines">
+            <div class="line visible" id="line1" onclick="nextLine()">“Before we were us, we were friends.”</div>
+            <div class="line" id="line2" onclick="nextLine()">“Bad timing. Missed chances. Life doing its thing.”</div>
+            <div class="line" id="line3" onclick="nextLine()">“Still… somehow… we kept finding each other.”</div>
+        </div>
+        <p class="caption">Annoying, honestly.</p>
+        <button onclick="nextSection('becoming')" id="nextBefore" style="display: none;">Continue</button>
+    </section>
+
+    <section class="section" id="becoming">
+        <div class="paragraphs">
+            <div class="paragraph visible" id="para1">“We’re not dramatic. We don’t do grand declarations. We do long calls, random silences, inside jokes, and showing up.”</div>
+            <div class="paragraph visible" id="para2">“You handle me. My moods. My overthinking. And you don’t leave when things feel heavy.”</div>
+            <div class="paragraph visible" id="para3">“That’s kind of my favourite thing about you.”</div>
+        </div>
+        <button onclick="nextSection('us')">Very Us</button>
+    </section>
+
+    <section class="section" id="us">
+        <h2>Very Us</h2>
+        <div class="cards">
+            <div class="card">
+                “You making puppy faces 🐶 (illegal levels of cute)”
+                <div class="popup">Always works. Every time. 🐕</div>
+            </div>
+            <div class="card">
+                “Me overthinking. You calming.”
+                <div class="popup">My chaos, your calm. Perfect balance. 🧘</div>
+            </div>
+            <div class="card">
+                “Distance = rude.”
+                <div class="popup">But we’re ruder. We win. 💪</div>
+            </div>
+            <div class="card">
+                “Still you. Somehow always you.”
+                <div class="popup">No matter what. Always. ❤️</div>
+            </div>
+            <div class="card">
+                “Low battery calls > fancy dates.”
+                <div class="popup">Quality over quantity. Always. 📞</div>
+            </div>
+        </div>
+        <button onclick="nextSection('truth')">Truth or React</button>
+    </section>
+
+    <section class="section" id="truth">
+        <h2>Truth or React</h2>
+        <div class="question" id="q1">
+            <p>Do you know you’re my safe place?</p>
+            <div class="buttons">
+                <button onclick="answer('yes', 'q1')">Yes</button>
+                <button onclick="answer('obviously', 'q1')">Obviously yes</button>
+            </div>
+            <div class="reaction" id="reaction1"></div>
+        </div>
+        <div class="question" id="q2" style="display: none;">
+            <p>Are you smiling right now?</p>
+            <div class="buttons">
+                <button onclick="answer('yes', 'q2')">Yes</button>
+                <button onclick="answer('obviously', 'q2')">Obviously yes</button>
+            </div>
+            <div class="reaction" id="reaction2"></div>
+        </div>
+        <div class="question" id="q3" style="display: none;">
+            <p>Did you expect me to do something like this?</p>
+            <div class="buttons">
+                <button onclick="answer('yes', 'q3')">Yes</button>
+                <button onclick="answer('obviously', 'q3')">Obviously yes</button>
+            </div>
+            <div class="reaction" id="reaction3"></div>
+        </div>
+        <button onclick="nextSection('distance')" id="toDistance" style="display: none;">One More</button>
+    </section>
+
+    <section class="section" id="distance">
+        <div class="distance-text">
+            <div class="distance-line visible" id="dline1">“Distance is hard.”</div>
+            <div class="distance-line visible" id="dline2">“Missing you is harder.”</div>
+            <div class="distance-line visible" id="dline3">“But choosing you?”</div>
+            <div class="distance-line visible" id="dline4">“That part is easy.”</div>
+        </div>
+        <button onclick="nextSection('question')" id="toQuestion" style="display: none;">Okay now you’re getting emotional 😒</button>
+    </section>
+
+    <section class="section" id="question">
+        <h1>So…</h1>
+        <p>Will you be my Valentine?</p>
+        <div class="buttons">
+            <button class="yes-btn" onclick="sayYes()">YES ❤️</button>
+            <button class="no-btn" onclick="sayNo()">NO 😏</button>
+        </div>
+        <div id="noMessages" style="margin-top: 20px; font-size: 1.1em;"></div>
+        <div class="final-message" id="finalMessage">
+            <h2>Congratulations.</h2>
+            <p>You’re officially my Valentine ❤️</p>
+            <p>Distance or not.<br>Loud or quiet.<br>It’s always you.</p>
+            <p class="footer">Made with too much love and slightly questionable coding.</p>
+        </div>
+    </section>
+
+    <script>
+        let currentLine = 1;
+        let currentQuestion = 1;
+        let noClicks = 0;
+
+        function nextSection(sectionId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('visible'));
+            document.getElementById(sectionId).classList.add('visible');
+            if (sectionId === 'distance') {
+                setTimeout(() => document.getElementById('toQuestion').style.display = 'block', 3000);
+            }
+        }
+
+        function nextLine() {
+            if (currentLine < 3) {
+                document.getElementById('line' + currentLine).classList.remove('visible');
+                currentLine++;
+                document.getElementById('line' + currentLine).classList.add('visible');
+            } else {
+                document.querySelector('.caption').style.display = 'none';
+                document.getElementById('nextBefore').style.display = 'block';
+            }
+        }
+
+        function answer(response, qId) {
+            const reaction = document.getElementById('reaction' + qId.slice(-1));
+            if (response === 'yes') {
+                reaction.textContent = 'Liar.';
+                reaction.style.display = 'block';
+            } else {
+                reaction.textContent = 'Good. 😊';
+                reaction.style.display = 'block';
+                setTimeout(() => {
+                    if (currentQuestion < 3) {
+                        document.getElementById('q' + currentQuestion).style.display = 'none';
+                        currentQuestion++;
+                        document.getElementById('q' + currentQuestion).style.display = 'block';
+                    } else {
+                        document.getElementById('toDistance').style.display = 'block';
+                    }
+                }, 1000);
+            }
+        }
+
+        function sayNo() {
+            noClicks++;
+            const noBtn = document.querySelector('.no-btn');
+            const yesBtn = document.querySelector('.yes-btn');
+            const messages = ['Nice try.', 'You’re embarrassing yourself.', 'We both know the answer.'];
+            document.getElementById('noMessages').textContent = messages[Math.min(noClicks - 1, messages.length - 1)];
+            noBtn.style.transform = `scale(${1 - noClicks * 0.2}) translateX(${noClicks * 20}px)`;
+            yesBtn.style.transform = `scale(${1 + noClicks * 0.2})`;
+            if (noClicks >= 3) {
+                noBtn.style.display = 'none';
+            }
+        }
+
+        function sayYes() {
+            document.querySelector('.buttons').style.display = 'none';
+            document.getElementById('noMessages').style.display = 'none';
+            document.getElementById('finalMessage').style.display = 'block';
+            startConfetti();
+        }
+
+        function startConfetti() {
+            const confettiContainer = document.getElementById('confetti');
+            confettiContainer.style.display = 'block';
+            for (let i = 0; i < 100; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + '%';
+                piece.style.animationDelay = Math.random() * 4 + 's';
+                piece.style.setProperty('--hue', Math.random() * 360);
+                confettiContainer.appendChild(piece);
+            }
+            setTimeout(() => {
+                confettiContainer.style.display = 'none';
+                confettiContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Floating hearts
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.textContent = '❤️';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            document.getElementById('hearts').appendChild(heart);
+            setTimeout(() => heart.remove(), 15000);
+        }
+        setInterval(createHeart, 3000);
+    </script>
+</body>
+</html>
