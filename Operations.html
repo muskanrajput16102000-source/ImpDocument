@@ -1,0 +1,273 @@
+# partner_operations_center.py
+"""
+Muskan Rajput - Partner Operations Analytics Suite
+Demonstrates: Business Transformation, EMEA Vendor Optimization, 
+Automated Reporting, SLA Management
+"""
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from datetime import datetime, timedelta
+import json
+from dataclasses import dataclass
+from typing import Dict, List, Tuple
+
+@dataclass
+class VendorPerformance:
+    """EMEA Vendor Performance Tracker"""
+    vendor_id: str
+    country: str  # DE, PL, US, UK
+    partner_type: str  # Restaurant, Grocery, Retail
+    sla_compliance: float  # percentage
+    delivery_time_avg: float  # minutes
+    order_volume: int
+    defect_rate: float  # percentage
+    revenue_impact: float  # GBP
+    
+class PartnerOperationsManager:
+    """
+    Strategy & Operations Lead Toolkit
+    Simulates the exact work at Deliveroo/Uber/Amazon
+    """
+    
+    def __init__(self, period: str = "Q1_2025"):
+        self.period = period
+        self.vendors = []
+        self.transformation_log = []
+        
+    def load_emea_vendor_data(self, data_path: str = None) -> pd.DataFrame:
+        """
+        Load 50+ EMEA vendor dataset (Germany, Poland, USA)
+        Simulates real partner operations data
+        """
+        # Simulating Wilhelm Fricke style EMEA logistics data
+        np.random.seed(42)
+        countries = ['DE'] * 20 + ['PL'] * 15 + ['US'] * 10 + ['UK'] * 5
+        partner_types = ['Restaurant'] * 30 + ['Grocery'] * 15 + ['Retail'] * 5
+        
+        data = {
+            'vendor_id': [f'VEN_{i:03d}' for i in range(50)],
+            'country': countries,
+            'region': ['EMEA' if c in ['DE', 'PL', 'UK'] else 'NA' for c in countries],
+            'partner_type': partner_types,
+            'sla_compliance': np.random.beta(7, 2, 50) * 100,  # 70-95%
+            'delivery_time_avg': np.random.normal(35, 8, 50),  # 25-45 mins
+            'orders_monthly': np.random.poisson(1500, 50),
+            'defect_rate': np.random.beta(2, 50, 50) * 100,  # 1-4%
+            'revenue_monthly': np.random.normal(50000, 15000, 50),
+            'operational_cost': np.random.normal(35000, 10000, 50)
+        }
+        
+        df = pd.DataFrame(data)
+        
+        # Add transformation opportunities (your 25% efficiency gain logic)
+        df['efficiency_score'] = (
+            (df['sla_compliance'] * 0.4) + 
+            ((50 - df['defect_rate']) * 0.3) + 
+            ((45 - df['delivery_time_avg']) * 0.3)
+        ) / 100
+        
+        df['cost_per_order'] = df['operational_cost'] / df['orders_monthly']
+        df['margin_health'] = (df['revenue_monthly'] - df['operational_cost']) / df['revenue_monthly'] * 100
+        
+        return df
+    
+    def identify_optimization_opportunities(self, df: pd.DataFrame) -> Dict:
+        """
+        Business Transformation Engine
+        Identifies 25% efficiency improvement opportunities (like Indokyrgyz)
+        """
+        ops = {}
+        
+        # High-volume, low-efficiency partners (quick wins)
+        ops['quick_wins'] = df[
+            (df['orders_monthly'] > df['orders_monthly'].quantile(0.75)) &
+            (df['efficiency_score'] < df['efficiency_score'].median())
+        ][['vendor_id', 'country', 'efficiency_score', 'cost_per_order']]
+        
+        # EMEA cross-border optimization (your specialty)
+        emea_df = df[df['region'] == 'EMEA']
+        ops['emea_bottlenecks'] = emea_df.nlargest(5, 'defect_rate')[['vendor_id', 'country', 'defect_rate', 'delivery_time_avg']]
+        
+        # Cost optimization >15% potential
+        ops['cost_optimization'] = df[df['cost_per_order'] > df['cost_per_order'].quantile(0.8)]
+        
+        # Calculate total opportunity
+        current_cost = df['operational_cost'].sum()
+        potential_saving = current_cost * 0.25  # Your 25% target
+        ops['roi_projection'] = {
+            'current_annual_cost': current_cost * 12,
+            'projected_savings_25%': potential_saving * 12,
+            'implementation_timeline': '6 months',
+            'feasibility_score': 85  # Based on your feasibility analysis
+        }
+        
+        return ops
+    
+    def generate_executive_dashboard(self, df: pd.DataFrame) -> go.Figure:
+        """
+        C-Suite Ready Dashboard (99% accuracy reporting)
+        Like the dashboards you built at Indokyrgyz/Wilhelm Fricke
+        """
+        fig = make_subplots(
+            rows=2, cols=2,
+            subplot_titles=('EMEA Performance Heatmap', 'Cost vs Efficiency Matrix', 
+                           'SLA Compliance Trends', 'Revenue Impact Analysis'),
+            specs=[[{"type": "scattergeo", "rowspan": 2}, {"type": "scatter"}],
+                   [None, {"type": "bar"}]]
+        )
+        
+        # 1. EMEA Geographic Performance (Germany, Poland focus)
+        country_perf = df.groupby('country').agg({
+            'efficiency_score': 'mean',
+            'sla_compliance': 'mean',
+            'revenue_monthly': 'sum'
+        }).reset_index()
+        
+        fig.add_trace(go.Choropleth(
+            locations=country_perf['country'],
+            z=country_perf['efficiency_score'],
+            colorscale='RdYlGn',
+            colorbar_title='Efficiency Score',
+            text=country_perf['country'],
+            name='EMEA Performance'
+        ), row=1, col=1)
+        
+        # 2. Cost vs Efficiency (Operational Excellence view)
+        fig.add_trace(go.Scatter(
+            x=df['cost_per_order'],
+            y=df['efficiency_score'],
+            mode='markers+text',
+            text=df['vendor_id'],
+            textposition="top center",
+            marker=dict(
+                size=df['orders_monthly']/50,
+                color=df['margin_health'],
+                colorscale='Viridis',
+                showscale=True
+            ),
+            name='Vendor Performance Matrix'
+        ), row=1, col=2)
+        
+        # 3. Top 10 at-risk partners (status-quo challengers)
+        at_risk = df.nsmallest(10, 'sla_compliance')
+        fig.add_trace(go.Bar(
+            x=at_risk['vendor_id'],
+            y=at_risk['sla_compliance'],
+            marker_color='red',
+            name='SLA At-Risk'
+        ), row=2, col=2)
+        
+        fig.update_layout(
+            height=800,
+            title_text=f"Partner Operations Command Center | {self.period}",
+            title_x=0.5,
+            template='plotly_white',
+            showlegend=False
+        )
+        
+        return fig
+    
+    def simulate_transformation_roadmap(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Operating Model Transformation Simulation
+        Shows before/after of your 25% efficiency improvement
+        """
+        roadmap = pd.DataFrame({
+            'phase': ['Current State', 'Month 1-2', 'Month 3-4', 'Month 5-6', 'Steady State'],
+            'avg_efficiency': [
+                df['efficiency_score'].mean(),
+                df['efficiency_score'].mean() * 1.08,
+                df['efficiency_score'].mean() * 1.15,
+                df['efficiency_score'].mean() * 1.22,
+                df['efficiency_score'].mean() * 1.25  # Your target
+            ],
+            'cost_per_order': [
+                df['cost_per_order'].mean(),
+                df['cost_per_order'].mean() * 0.95,
+                df['cost_per_order'].mean() * 0.88,
+                df['cost_per_order'].mean() * 0.82,
+                df['cost_per_order'].mean() * 0.75  # 25% cost reduction
+            ],
+            'automation_level': [20, 35, 55, 75, 85],  # Percentage
+            'stakeholder_buy_in': [100, 85, 90, 95, 100],  # Based on your change mgmt
+            'key_milestone': [
+                'Baseline Assessment',
+                'Process Standardisation',
+                'Tech Implementation',
+                'Partner Onboarding New Playbooks',
+                'Continuous Improvement'
+            ]
+        })
+        
+        return roadmap
+    
+    def automated_slack_report(self, ops_data: Dict) -> str:
+        """
+        Automated Reporting (40% reporting reduction simulation)
+        Generates executive summary like you implemented at Wilhelm Fricke
+        """
+        report = f"""
+🚀 *Partner Operations Weekly | {self.period}*
+
+📊 *EMEA Performance Snapshot:*
+• {len(self.vendors)} Active Partners (DE: {len([v for v in self.vendors if v.country=='DE'])}, PL: {len([v for v in self.vendors if v.country=='PL'])})
+• Avg SLA Compliance: {np.mean([v.sla_compliance for v in self.vendors]):.1f}%
+• Efficiency Gains Delivery: +25% (Status: On Track)
+
+🎯 *Transformation Opportunities:*
+• Quick Wins Identified: {len(ops_data['quick_wins'])} high-volume partners ready for optimization
+• EMEA Bottlenecks: {len(ops_data['emea_bottlenecks'])} requiring immediate attention
+• Projected Annual Savings: £{ops_data['roi_projection']['projected_savings_25%']:,.0f}
+
+⚠️ *Status Quo Challenges:*
+• Top Risk Partner: {ops_data['emea_bottlenecks'].iloc[0]['vendor_id']} (Defect Rate: {ops_data['emea_bottlenecks'].iloc[0]['defect_rate']:.2f}%)
+• Feasibility Analysis: {ops_data['roi_projection']['feasibility_score']}% viability score
+
+*Next Steps:* Commercial <> Product <> Ops alignment meeting scheduled
+*Prepared by:* Muskan Rajput, Strategy & Operations
+        """
+        return report
+
+def main():
+    """Demonstration of Business Transformation Capabilities"""
+    
+    # Initialize as Strategy & Operations Lead
+    ops_manager = PartnerOperationsManager(period="Q1_2025")
+    
+    # Load EMEA vendor portfolio (50+ partners, Germany/Poland/USA)
+    print("📊 Loading EMEA Partner Operations Dataset...")
+    vendor_df = ops_manager.load_emea_vendor_data()
+    print(f"✅ Loaded {len(vendor_df)} vendors across {vendor_df['country'].nunique()} countries")
+    
+    # Run optimization analysis (25% efficiency improvement opportunity)
+    print("\n🔍 Running Operating Model Transformation Analysis...")
+    opportunities = ops_manager.identify_optimization_opportunities(vendor_df)
+    print(f"💡 Identified {len(opportunities['quick_wins'])} quick-win optimization targets")
+    print(f"💰 Projected Annual Savings: £{opportunities['roi_projection']['projected_savings_25%']:,.0f}")
+    
+    # Generate executive dashboard (C-Suite ready)
+    print("\n📈 Generating Executive Dashboard...")
+    dashboard = ops_manager.generate_executive_dashboard(vendor_df)
+    dashboard.show()  # In real use: dashboard.write_html("emea_ops_dashboard.html")
+    
+    # Transformation roadmap (6-month rollout)
+    print("\n🗺️  Simulating 6-Month Transformation Roadmap...")
+    roadmap = ops_manager.simulate_transformation_roadmap(vendor_df)
+    print(roadmap[['phase', 'avg_efficiency', 'cost_per_order', 'key_milestone']])
+    
+    # Automated reporting (40% reporting overhead reduction)
+    print("\n📨 Generating Automated Executive Report...")
+    report = ops_manager.automated_slack_report(opportunities)
+    print(report)
+    
+    # Export insights for stakeholder alignment
+    print("\n💼 Exporting Stakeholder Alignment Pack...")
+    vendor_df.to_csv('emea_vendor_performance.csv', index=False)
+    roadmap.to_csv('transformation_roadmap.csv', index=False)
+    print("✅ Files exported for Commercial and Product team review")
+
+if __name__ == "__main__":
+    main()
